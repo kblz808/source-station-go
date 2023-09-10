@@ -1,51 +1,25 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"source-station/model"
 )
 
-type User struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	Username  string             `bson:"username"`
-	Email     string             `bson:"email"`
-	Password  string             `bson:"password"`
-	FirstName string             `bson:"firstName"`
-	LastName  string             `bson:"lastName"`
-	Bio       string             `bson:"bio"`
-	CreatedAt primitive.DateTime `bson:"createdAt,omitempty"`
-	UpdatedAt primitive.DateTime `bson:"updatedAt,omitemty"`
+func init() {
+	if err := model.Connect(); err != nil {
+		log.Fatal(err)
+	}
+	println("connected")
 }
 
 func main() {
-	// clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	clientOptions := options.Client().ApplyURI("mongodb+srv://harofpicvw:mongo-password@cluster0.wlhh0so.mongodb.net/?retryWrites=true&w=majority")
-
-	// connect
-	client, err := mongo.Connect(context.Background(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// check connection
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("connected")
-
-	// users collection
-	usersCollection := client.Database("mydb").Collection("users")
-
-	// new user
-	newUser := User{
+	newUser := model.User{
 		Username:  "admin",
 		Email:     "admin@mail.com",
 		Password:  "admin123",
@@ -56,12 +30,41 @@ func main() {
 		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),
 	}
 
-	// insert
-	insertResult, err := usersCollection.InsertOne(context.Background(), newUser)
+	_, err := model.InsertUser(newUser)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("inserted id: ", insertResult.InsertedID)
+	newPost := model.Post{
+		Title:          "first post",
+		Content:        "console.log(code)",
+		User:           primitive.NewObjectID(),
+		Visibility:     "public",
+		ExpirationDate: primitive.NewDateTimeFromTime(time.Now()),
+		ViewCount:      0,
+		LikesCount:     0,
+		CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+		UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+	}
 
+	err = model.InsertPost(newPost)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	println("new post added")
+
+	router := gin.Default()
+	router.GET("/posts", func(c *gin.Context) {
+		posts, err := model.GetAllPosts()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		c.JSON(http.StatusOK, posts)
+	})
+
+	err = router.Run(":8080")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
