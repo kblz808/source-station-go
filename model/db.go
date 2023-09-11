@@ -2,8 +2,10 @@ package model
 
 import (
 	"context"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -12,13 +14,17 @@ import (
 var client *mongo.Client
 
 func Connect() error {
-	// clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	clientOptions := options.Client().ApplyURI("mongodb+srv://harofpicvw:mongo-password@cluster0.wlhh0so.mongodb.net/?retryWrites=true&w=majority")
+	err := godotenv.Load()
+	if err != nil {
+		return err
+	}
 
-	var err error
+	// clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(os.Getenv("CONNECTION_STRING"))
 
 	client, err = mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
+		println("1-> ", err)
 		return err
 	}
 	return nil

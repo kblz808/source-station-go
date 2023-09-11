@@ -26,3 +26,9 @@ type Post struct {
 	CreatedAt      primitive.DateTime `bson:"createdAt,omitempty"`
 	UpdatedAt      primitive.DateTime `bson:"updatedAt,omitempty"`
 }
+
+type Comment struct {
+	ID      primitive.ObjectID `bson:"_id,omitempty"`
+	Content string
+	User    primitive.ObjectID `bson:"user,omitempty"`
+}

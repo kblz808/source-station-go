@@ -35,6 +35,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	println("added user")
+
 	newPost := model.Post{
 		Title:          "first post",
 		Content:        "console.log(code)",
