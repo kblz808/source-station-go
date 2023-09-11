@@ -11,35 +11,35 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
+type DB struct {
+	client *mongo.Client
+}
 
-func Connect() error {
+func (db *DB) Connect() error {
 	err := godotenv.Load()
 	if err != nil {
 		return err
 	}
 
-	// clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	clientOptions := options.Client().ApplyURI(os.Getenv("CONNECTION_STRING"))
 
-	client, err = mongo.Connect(context.Background(), clientOptions)
-	if err != nil {
-		println("1-> ", err)
-		return err
-	}
-	return nil
-}
-
-func Ping() error {
-	err := client.Ping(context.Background(), nil)
+	db.client, err = mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func InsertUser(newUser User) (*mongo.InsertOneResult, error) {
-	usersCollection := client.Database("mydb").Collection("users")
+func (db *DB) Ping() error {
+	err := db.client.Ping(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) InsertUser(newUser User) (*mongo.InsertOneResult, error) {
+	usersCollection := db.client.Database("mydb").Collection("users")
 	result, err := usersCollection.InsertOne(context.Background(), newUser)
 	if err != nil {
 		return nil, err
@@ -47,8 +47,8 @@ func InsertUser(newUser User) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
-func InsertPost(newPost Post) error {
-	postsCollection := client.Database("mydb").Collection("posts")
+func (db *DB) InsertPost(newPost Post) error {
+	postsCollection := db.client.Database("mydb").Collection("posts")
 	_, err := postsCollection.InsertOne(context.Background(), newPost)
 	if err != nil {
 		return err
@@ -56,14 +56,13 @@ func InsertPost(newPost Post) error {
 	return nil
 }
 
-func GetAllPosts() ([]Post, error) {
-	collection := client.Database("mydb").Collection("posts")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func (db *DB) GetAllPosts() ([]Post, error) {
+	collection := db.client.Database("mydb").Collection("posts")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
-		println("1-> ", err.Error())
 		return nil, err
 	}
 	defer cursor.Close(ctx)
@@ -73,10 +72,32 @@ func GetAllPosts() ([]Post, error) {
 		var post Post
 		err := cursor.Decode(&post)
 		if err != nil {
-			println("2-> ", err)
 			return nil, err
 		}
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+func (db *DB) GetAllUsers() ([]User, error) {
+	collection := db.client.Database("mydb").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []User
+	for cursor.Next(ctx) {
+		var user User
+		err := cursor.Decode(&user)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }
