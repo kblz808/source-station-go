@@ -2,13 +2,11 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"source-station/controllers"
-	"source-station/model"
+	"source-station/utils"
 )
 
 var app *controllers.App
@@ -23,42 +21,11 @@ func init() {
 }
 
 func main() {
-	newUser := model.User{
-		Username:  "admin",
-		Email:     "admin@mail.com",
-		Password:  "admin123",
-		FirstName: "alex",
-		LastName:  "morty",
-		Bio:       "the admin",
-		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
-		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),
-	}
-
-	_, err := app.DB.InsertUser(newUser)
+	_, err := app.DB.InsertUser(utils.RandomUser())
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	println("added user")
-
-	newPost := model.Post{
-		Title:          "first post",
-		Content:        "console.log(code)",
-		User:           primitive.NewObjectID(),
-		Visibility:     "public",
-		ExpirationDate: primitive.NewDateTimeFromTime(time.Now()),
-		ViewCount:      0,
-		LikesCount:     0,
-		CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
-		UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
-	}
-
-	err = app.DB.InsertPost(newPost)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	println("new post added")
 
 	router := gin.Default()
 	router.GET("/posts", app.GetPosts)

@@ -38,7 +38,7 @@ func (db *DB) Ping() error {
 	return nil
 }
 
-func (db *DB) InsertUser(newUser User) (*mongo.InsertOneResult, error) {
+func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
 	usersCollection := db.client.Database("mydb").Collection("users")
 	result, err := usersCollection.InsertOne(context.Background(), newUser)
 	if err != nil {
