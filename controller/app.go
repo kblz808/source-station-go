@@ -7,23 +7,33 @@ import (
 )
 
 type App struct {
-	Name    string
-	Port    string
-	Version string
-	DB      model.DB
-	Router  *gin.Engine
+	Name        string
+	Port        string
+	Version     string
+	Environment string
+	DB          model.DB
+	Router      *gin.Engine
 }
 
-func NewApp(name string, port string) (*App, error) {
-	app := &App{
-		Name:    "source-station",
-		Port:    ":3000",
-		Version: "v1",
-		Router:  gin.Default(),
+func NewApp(name, port, environment string) (*App, error) {
+	if environment == "release" {
+		gin.SetMode(gin.ReleaseMode)
 	}
+
+	app := &App{
+		Name:        name,
+		Port:        port,
+		Version:     "v1",
+		Environment: environment,
+		Router:      gin.Default(),
+	}
+
 	if err := app.DB.Connect(); err != nil {
 		return nil, err
 	}
+
+	app.InitializeRoutes()
+
 	return app, nil
 }
 
@@ -32,4 +42,6 @@ func (app *App) InitializeRoutes() {
 	app.Router.GET("/users", app.GetUsers)
 	app.Router.POST("/users", app.AddUser)
 	app.Router.POST("/posts", app.AddPost)
+	app.Router.POST("/comments/:postID", app.GetComments)
+	app.Router.POST("/comments", app.AddComment)
 }

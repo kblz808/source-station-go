@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -16,13 +16,9 @@ type DB struct {
 }
 
 func (db *DB) Connect() error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
-	}
-
 	clientOptions := options.Client().ApplyURI(os.Getenv("CONNECTION_STRING"))
 
+	var err error
 	db.client, err = mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return err
@@ -39,8 +35,8 @@ func (db *DB) Ping() error {
 }
 
 func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
-	usersCollection := db.client.Database("mydb").Collection("users")
-	result, err := usersCollection.InsertOne(context.Background(), newUser)
+	collection := db.client.Database("mydb").Collection("users")
+	result, err := collection.InsertOne(context.Background(), newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +44,8 @@ func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
 }
 
 func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
-	postsCollection := db.client.Database("mydb").Collection("posts")
-	result, err := postsCollection.InsertOne(context.Background(), newPost)
+	collecton := db.client.Database("mydb").Collection("posts")
+	result, err := collecton.InsertOne(context.Background(), newPost)
 	if err != nil {
 		return nil, err
 	}
@@ -112,4 +108,46 @@ func (db *DB) GetAllUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (db *DB) InsertComment(newComment *Comment) (*mongo.InsertOneResult, error) {
+	collection := db.client.Database("mydb").Collection("comments")
+	result, err := collection.InsertOne(context.Background(), newComment)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (db *DB) GetPostComments(postID primitive.ObjectID) ([]Comment, error) {
+	collection := db.client.Database("mydb").Collection("comments")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{"post_id": postID},
+		},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var comments []Comment
+	for cursor.Next(ctx) {
+		var comment Comment
+		if err := cursor.Decode(&comment); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
 }

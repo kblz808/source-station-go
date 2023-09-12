@@ -5,6 +5,7 @@ import (
 	"source-station/model"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (app *App) GetPosts(c *gin.Context) {
@@ -51,4 +52,36 @@ func (app *App) AddPost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "post created successfully", "id": result.InsertedID})
+}
+
+func (app *App) AddComment(c *gin.Context) {
+	var comment model.Comment
+
+	if err := c.ShouldBindJSON(&comment); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	result, err := app.DB.InsertComment(&comment)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "comment created successfully", "id": result.InsertedID})
+}
+
+func (app *App) GetComments(c *gin.Context) {
+	postIDParam := c.Param("postID")
+
+	postID, err := primitive.ObjectIDFromHex(postIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id post ID"})
+		return
+	}
+
+	comments, err := app.DB.GetPostComments(postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, comments)
 }
