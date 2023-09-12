@@ -22,15 +22,14 @@ func RandomUser() *model.User {
 
 func RandomPost() *model.Post {
 	return &model.Post{
-		Title:          gofakeit.BookTitle(),
-		Content:        gofakeit.Quote(),
-		ContentType:    "md",
-		User:           primitive.NewObjectIDFromTimestamp(time.Now()),
-		Visibility:     "public",
-		ExpirationDate: primitive.NewDateTimeFromTime(time.Now()),
-		ViewCount:      0,
-		LikesCount:     0,
-		CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
-		UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+		Title:       gofakeit.BookTitle(),
+		Content:     gofakeit.Quote(),
+		ContentType: "md",
+		User:        primitive.NewObjectIDFromTimestamp(time.Now()),
+		Visibility:  "public",
+		ViewCount:   0,
+		LikesCount:  0,
+		CreatedAt:   primitive.NewDateTimeFromTime(time.Now()),
+		UpdatedAt:   primitive.NewDateTimeFromTime(time.Now()),
 	}
 }
