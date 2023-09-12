@@ -35,7 +35,7 @@ func (app *App) AddUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"ok": result.InsertedID})
+	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully", "id": result.InsertedID})
 }
 
 func (app *App) AddPost(c *gin.Context) {
@@ -50,5 +50,5 @@ func (app *App) AddPost(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"ok": result.InsertedID})
+	c.JSON(http.StatusCreated, gin.H{"message": "post created successfully", "id": result.InsertedID})
 }
