@@ -11,7 +11,6 @@ import (
 
 func RandomUser() *model.User {
 	return &model.User{
-		ID:        primitive.NewObjectIDFromTimestamp(time.Now()),
 		Username:  gofakeit.Username(),
 		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, false, false, 10),
@@ -20,5 +19,20 @@ func RandomUser() *model.User {
 		Bio:       gofakeit.Hobby(),
 		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),
+	}
+}
+
+func RandomPost() *model.Post {
+	return &model.Post{
+		Title:          gofakeit.BookTitle(),
+		Content:        gofakeit.Quote(),
+		ContentType:    "md",
+		User:           primitive.NewObjectIDFromTimestamp(time.Now()),
+		Visibility:     "public",
+		ExpirationDate: primitive.NewDateTimeFromTime(time.Now()),
+		ViewCount:      0,
+		LikesCount:     0,
+		CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+		UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
 	}
 }

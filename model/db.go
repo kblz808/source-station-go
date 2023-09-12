@@ -47,13 +47,13 @@ func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
-func (db *DB) InsertPost(newPost Post) error {
+func (db *DB) InsertPost(newPost Post) (*mongo.InsertOneResult, error) {
 	postsCollection := db.client.Database("mydb").Collection("posts")
-	_, err := postsCollection.InsertOne(context.Background(), newPost)
+	result, err := postsCollection.InsertOne(context.Background(), newPost)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result, nil
 }
 
 func (db *DB) GetAllPosts() ([]Post, error) {
@@ -61,7 +61,10 @@ func (db *DB) GetAllPosts() ([]Post, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := collection.Find(ctx, bson.M{})
+	filter := bson.D{}
+	options := options.Find().SetSort(bson.D{{Key: "time", Value: -1}}).SetLimit(10)
+
+	cursor, err := collection.Find(ctx, filter, options)
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +73,16 @@ func (db *DB) GetAllPosts() ([]Post, error) {
 	var posts []Post
 	for cursor.Next(ctx) {
 		var post Post
-		err := cursor.Decode(&post)
-		if err != nil {
+		if err := cursor.Decode(&post); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
 	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
 	return posts, nil
 }
 

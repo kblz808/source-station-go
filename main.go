@@ -3,20 +3,17 @@ package main
 import (
 	"log"
 
-	"github.com/gin-gonic/gin"
-
-	"source-station/controllers"
+	"source-station/controller"
 	"source-station/utils"
 )
 
-var app *controllers.App
+var app *controller.App
 
 func init() {
-	app = &controllers.App{
-		Name: "source-station",
-	}
-	if err := app.DB.Connect(); err != nil {
-		log.Fatal(err)
+	var err error
+	app, err = controller.NewApp("source-station", "3000")
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 }
 
@@ -27,11 +24,14 @@ func main() {
 	}
 	println("added user")
 
-	router := gin.Default()
-	router.GET("/posts", app.GetPosts)
-	router.GET("/users", app.GetUsers)
+	_, err = app.DB.InsertPost(*utils.RandomPost())
+	if err != nil {
+		log.Fatal(err)
+	}
+	println("added post")
 
-	err = router.Run(":8080")
+	app.InitializeRoutes()
+	err = app.Router.Run(app.Port)
 	if err != nil {
 		log.Fatal(err)
 	}

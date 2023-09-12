@@ -18,6 +18,7 @@ type Post struct {
 	ID             primitive.ObjectID `bson:"_id,omitempty"`
 	Title          string             `bson:"title"`
 	Content        string             `bson:"content"`
+	ContentType    string             `bson:"contentType"`
 	User           primitive.ObjectID `bson:"user,omitempty"`
 	Visibility     string             `bson:"visibility"`
 	ExpirationDate primitive.DateTime `bson:"expirationDate"`
