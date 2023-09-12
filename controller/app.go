@@ -31,4 +31,5 @@ func (app *App) InitializeRoutes() {
 	app.Router.GET("/posts", app.GetPosts)
 	app.Router.GET("/users", app.GetUsers)
 	app.Router.POST("/users", app.AddUser)
+	app.Router.POST("/posts", app.AddPost)
 }

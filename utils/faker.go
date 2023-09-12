@@ -14,8 +14,6 @@ func RandomUser() *model.User {
 		Username:  gofakeit.Username(),
 		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, false, false, 10),
-		FirstName: gofakeit.FirstName(),
-		LastName:  gofakeit.LastName(),
 		Bio:       gofakeit.Hobby(),
 		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),

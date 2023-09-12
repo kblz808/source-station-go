@@ -37,3 +37,18 @@ func (app *App) AddUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"ok": result.InsertedID})
 }
+
+func (app *App) AddPost(c *gin.Context) {
+	var post model.Post
+
+	if err := c.ShouldBindJSON(&post); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	result, err := app.DB.InsertPost(&post)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": result.InsertedID})
+}

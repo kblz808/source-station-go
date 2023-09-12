@@ -47,7 +47,7 @@ func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
-func (db *DB) InsertPost(newPost Post) (*mongo.InsertOneResult, error) {
+func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
 	postsCollection := db.client.Database("mydb").Collection("posts")
 	result, err := postsCollection.InsertOne(context.Background(), newPost)
 	if err != nil {
@@ -106,5 +106,10 @@ func (db *DB) GetAllUsers() ([]User, error) {
 		}
 		users = append(users, user)
 	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }

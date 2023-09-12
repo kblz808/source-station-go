@@ -7,8 +7,6 @@ type User struct {
 	Username  string             `bson:"username"`
 	Email     string             `bson:"email"`
 	Password  string             `bson:"password"`
-	FirstName string             `bson:"firstName"`
-	LastName  string             `bson:"lastName"`
 	Bio       string             `bson:"bio"`
 	CreatedAt primitive.DateTime `bson:"createdAt,omitempty"`
 	UpdatedAt primitive.DateTime `bson:"updatedAt,omitemty"`
@@ -32,4 +30,5 @@ type Comment struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty"`
 	Content string
 	User    primitive.ObjectID `bson:"user,omitempty"`
+	Post    primitive.ObjectID `bson:"post,omitempty"`
 }
