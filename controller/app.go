@@ -30,4 +30,5 @@ func NewApp(name string, port string) (*App, error) {
 func (app *App) InitializeRoutes() {
 	app.Router.GET("/posts", app.GetPosts)
 	app.Router.GET("/users", app.GetUsers)
+	app.Router.POST("/users", app.AddUser)
 }
