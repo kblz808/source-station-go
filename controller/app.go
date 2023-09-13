@@ -38,10 +38,12 @@ func NewApp(name, port, environment string) (*App, error) {
 }
 
 func (app *App) InitializeRoutes() {
-	app.Router.GET("/posts", app.GetPosts)
 	app.Router.GET("/users", app.GetUsers)
-	app.Router.POST("/users", app.AddUser)
+	app.Router.POST("/users", app.RegisterUser)
+
+	app.Router.GET("/posts", app.GetPosts)
 	app.Router.POST("/posts", app.AddPost)
+
 	app.Router.POST("/comments/:postID", app.GetComments)
 	app.Router.POST("/comments", app.AddComment)
 }
