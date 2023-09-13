@@ -3,40 +3,19 @@ package controller
 import (
 	"net/http"
 	"source-station/model"
+	"source-station/utils"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// post
 func (app *App) GetPosts(c *gin.Context) {
 	posts, err := app.DB.GetAllPosts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	c.JSON(http.StatusOK, posts)
-}
-
-func (app *App) GetUsers(c *gin.Context) {
-	users, err := app.DB.GetAllUsers()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	c.JSON(http.StatusOK, users)
-}
-
-func (app *App) AddUser(c *gin.Context) {
-	var user model.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
-	result, err := app.DB.InsertUser(&user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully", "id": result.InsertedID})
 }
 
 func (app *App) AddPost(c *gin.Context) {
@@ -54,6 +33,41 @@ func (app *App) AddPost(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "post created successfully", "id": result.InsertedID})
 }
 
+// user
+func (app *App) GetUsers(c *gin.Context) {
+	users, err := app.DB.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, users)
+}
+
+func (app *App) RegisterUser(c *gin.Context) {
+	var user model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	result, err := app.DB.InsertUser(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	inserteID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error registering user, please try again"})
+	}
+
+	token, err := utils.GenerateJWTToken(primitive.ObjectID(inserteID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error registering user, please try again"})
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully", "token": token})
+}
+
+// comment
 func (app *App) AddComment(c *gin.Context) {
 	var comment model.Comment
 
