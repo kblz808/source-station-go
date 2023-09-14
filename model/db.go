@@ -59,6 +59,33 @@ func (db *DB) FindUser(username string) (*User, error) {
 	return &user, nil
 }
 
+func (db *DB) UpdateUser(userIDString string, updatedUser *User) (*mongo.UpdateResult, error) {
+	collection := db.client.Database("mydb").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userID, err := primitive.ObjectIDFromHex(userIDString)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"_id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"username": updatedUser.Username,
+			"email":    updatedUser.Email,
+			"password": updatedUser.Password,
+			"bio":      updatedUser.Bio,
+		},
+	}
+	result, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
 	collecton := db.client.Database("mydb").Collection("posts")
 	result, err := collecton.InsertOne(context.Background(), newPost)

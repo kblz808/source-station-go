@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"os"
 	"time"
 
@@ -20,4 +21,22 @@ func GenerateJWTToken(userID interface{}) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func GetClaimFromJWT(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if token.Valid {
+		claims := token.Claims.(jwt.MapClaims)
+
+		userID := claims["userID"].(string)
+		return userID, nil
+	}
+
+	return "", errors.New("invalid auth token")
 }
