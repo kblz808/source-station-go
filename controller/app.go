@@ -40,6 +40,7 @@ func NewApp(name, port, environment string) (*App, error) {
 func (app *App) InitializeRoutes() {
 	// app.Router.GET("/users", app.GetUsers)
 	app.Router.POST("/register", app.RegisterUser)
+	app.Router.POST("/login", app.LoginUser)
 
 	app.Router.GET("/posts", app.JWTMiddleware, app.GetPosts)
 	app.Router.POST("/posts", app.JWTMiddleware, app.AddPost)

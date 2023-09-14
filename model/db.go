@@ -43,6 +43,22 @@ func (db *DB) InsertUser(newUser *User) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
+func (db *DB) FindUser(username string) (*User, error) {
+	collection := db.client.Database("mydb").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user User
+
+	result := collection.FindOne(ctx, bson.M{"username": username})
+	err := result.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
 	collecton := db.client.Database("mydb").Collection("posts")
 	result, err := collecton.InsertOne(context.Background(), newPost)
