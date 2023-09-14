@@ -42,6 +42,8 @@ func (app *App) InitializeRoutes() {
 	app.Router.POST("/register", app.RegisterUser)
 	app.Router.POST("/login", app.LoginUser)
 
+	app.Router.POST("/update", app.JWTMiddleware, app.UpdateUser)
+
 	app.Router.GET("/posts", app.JWTMiddleware, app.GetPosts)
 	app.Router.POST("/posts", app.JWTMiddleware, app.AddPost)
 
