@@ -13,7 +13,7 @@ type User struct {
 }
 
 type Post struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"-"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Title       string             `bson:"title" json:"title" binding:"required"`
 	Content     string             `bson:"content" json:"content" binding:"required"`
 	ContentType string             `bson:"contentType" json:"content_type" binding:"required"`
@@ -26,7 +26,7 @@ type Post struct {
 }
 
 type Comment struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"-"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Content   string             `bson:"content" json:"content" binding:"required"`
 	User      primitive.ObjectID `bson:"user_id,omitempty" json:"user_id"`
 	Post      primitive.ObjectID `bson:"post_id,omitempty" json:"post_id" binding:"required"`

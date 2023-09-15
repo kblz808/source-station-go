@@ -50,6 +50,24 @@ func (app *App) AddPost(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "post created successfully", "id": result.InsertedID})
 }
 
+func (app *App) UpdatePost(c *gin.Context) {
+	var post model.Post
+
+	if err := c.ShouldBindJSON(&post); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := app.DB.UpdatePost(&post)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "post updated successfully"})
+
+}
+
 // user
 func (app *App) GetUsers(c *gin.Context) {
 	users, err := app.DB.GetAllUsers()
@@ -137,8 +155,7 @@ func (app *App) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	result, err := app.DB.UpdateUser(userID, &user)
-	println(result)
+	_, err = app.DB.UpdateUser(userID, &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
