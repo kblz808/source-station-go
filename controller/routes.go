@@ -11,7 +11,14 @@ import (
 
 // post
 func (app *App) GetPosts(c *gin.Context) {
-	posts, err := app.DB.GetAllPosts()
+	tokenString := c.GetHeader("Authorization")
+	userID, err := utils.GetClaimFromJWT(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	posts, err := app.DB.GetPosts(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -27,7 +34,14 @@ func (app *App) AddPost(c *gin.Context) {
 		return
 	}
 
-	result, err := app.DB.InsertPost(&post)
+	tokenString := c.GetHeader("Authorization")
+	userID, err := utils.GetClaimFromJWT(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	result, err := app.DB.InsertPost(userID, &post)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -118,7 +132,6 @@ func (app *App) UpdateUser(c *gin.Context) {
 
 	tokenString := c.GetHeader("Authorization")
 	userID, err := utils.GetClaimFromJWT(tokenString)
-	println(userID)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return

@@ -86,8 +86,15 @@ func (db *DB) UpdateUser(userIDString string, updatedUser *User) (*mongo.UpdateR
 	return result, nil
 }
 
-func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
+func (db *DB) InsertPost(userIDString string, newPost *Post) (*mongo.InsertOneResult, error) {
 	collecton := db.client.Database("mydb").Collection("posts")
+
+	userID, err := primitive.ObjectIDFromHex(userIDString)
+	if err != nil {
+		return nil, err
+	}
+	newPost.User = userID
+
 	result, err := collecton.InsertOne(context.Background(), newPost)
 	if err != nil {
 		return nil, err
@@ -95,15 +102,19 @@ func (db *DB) InsertPost(newPost *Post) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
-func (db *DB) GetAllPosts() ([]Post, error) {
+func (db *DB) GetPosts(userIDString string) ([]Post, error) {
 	collection := db.client.Database("mydb").Collection("posts")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.D{}
-	options := options.Find().SetSort(bson.D{{Key: "time", Value: -1}}).SetLimit(10)
+	userID, err := primitive.ObjectIDFromHex(userIDString)
+	if err != nil {
+		return nil, err
+	}
 
-	cursor, err := collection.Find(ctx, filter, options)
+	filter := bson.M{"user_id": userID}
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
