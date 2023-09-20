@@ -188,8 +188,15 @@ func (db *DB) GetAllUsers() ([]User, error) {
 	return users, nil
 }
 
-func (db *DB) InsertComment(newComment *Comment) (*mongo.InsertOneResult, error) {
+func (db *DB) InsertComment(userIDString string, newComment *Comment) (*mongo.InsertOneResult, error) {
 	collection := db.client.Database("mydb").Collection("comments")
+
+	userID, err := primitive.ObjectIDFromHex(userIDString)
+	if err != nil {
+		return nil, err
+	}
+	newComment.User = userID
+
 	result, err := collection.InsertOne(context.Background(), newComment)
 	if err != nil {
 		return nil, err
@@ -228,4 +235,23 @@ func (db *DB) GetPostComments(postID primitive.ObjectID) ([]Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func (db *DB) UpdateComment(newComment *Comment) (*mongo.UpdateResult, error) {
+	collection := db.client.Database("mydb").Collection("comments")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": newComment.ID}
+	update := bson.M{
+		"$set": bson.M{
+			"content": newComment.Content,
+		},
+	}
+	result, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

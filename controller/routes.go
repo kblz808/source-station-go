@@ -65,7 +65,6 @@ func (app *App) UpdatePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "post updated successfully"})
-
 }
 
 // user
@@ -173,7 +172,14 @@ func (app *App) AddComment(c *gin.Context) {
 		return
 	}
 
-	result, err := app.DB.InsertComment(&comment)
+	tokenString := c.GetHeader("Authorization")
+	userID, err := utils.GetClaimFromJWT(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	result, err := app.DB.InsertComment(userID, &comment)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -187,7 +193,7 @@ func (app *App) GetComments(c *gin.Context) {
 
 	postID, err := primitive.ObjectIDFromHex(postIDParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id post ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post ID"})
 		return
 	}
 
@@ -198,4 +204,20 @@ func (app *App) GetComments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, comments)
+}
+
+func (app *App) UpdateComment(c *gin.Context) {
+	var comment model.Comment
+
+	if err := c.ShouldBindJSON(&comment); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := app.DB.UpdateComment(&comment)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "comment updateed"})
 }

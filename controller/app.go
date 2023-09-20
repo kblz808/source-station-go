@@ -46,7 +46,9 @@ func (app *App) InitializeRoutes() {
 
 	app.Router.GET("/posts", app.JWTMiddleware, app.GetPosts)
 	app.Router.POST("/posts", app.JWTMiddleware, app.AddPost)
+	app.Router.PUT("/posts", app.JWTMiddleware, app.UpdatePost)
 
-	app.Router.POST("/comments/:postID", app.JWTMiddleware, app.GetComments)
+	app.Router.GET("/comments/:postID", app.JWTMiddleware, app.GetComments)
 	app.Router.POST("/comments", app.JWTMiddleware, app.AddComment)
+	app.Router.PUT("/comments", app.JWTMiddleware, app.UpdateComment)
 }
