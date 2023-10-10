@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"source-station/model"
+	"source-station/database"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,7 +11,7 @@ type App struct {
 	Port        string
 	Version     string
 	Environment string
-	DB          model.DB
+	DB          database.DB
 	Router      *gin.Engine
 }
 
@@ -38,7 +38,7 @@ func NewApp(name, port, environment string) (*App, error) {
 }
 
 func (app *App) InitializeRoutes() {
-	// app.Router.GET("/users", app.GetUsers)
+	app.Router.GET("/users", app.GetUsers)
 	app.Router.POST("/register", app.RegisterUser)
 	app.Router.POST("/login", app.LoginUser)
 
@@ -46,7 +46,10 @@ func (app *App) InitializeRoutes() {
 
 	app.Router.GET("/posts", app.JWTMiddleware, app.GetPosts)
 	app.Router.POST("/posts", app.JWTMiddleware, app.AddPost)
+	app.Router.PUT("/posts", app.JWTMiddleware, app.UpdatePost)
 
-	app.Router.POST("/comments/:postID", app.JWTMiddleware, app.GetComments)
+	app.Router.GET("/comments/:postID", app.JWTMiddleware, app.GetComments)
 	app.Router.POST("/comments", app.JWTMiddleware, app.AddComment)
+	app.Router.PUT("/comments", app.JWTMiddleware, app.UpdateComment)
+	app.Router.DELETE("/comments", app.JWTMiddleware, app.DeleteComment)
 }

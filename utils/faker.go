@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"source-station/model"
+	"source-station/database"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func RandomUser() *model.User {
-	return &model.User{
+func RandomUser() *database.User {
+	return &database.User{
 		Username:  gofakeit.Username(),
 		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, false, false, 10),
@@ -20,8 +20,8 @@ func RandomUser() *model.User {
 	}
 }
 
-func RandomPost() *model.Post {
-	return &model.Post{
+func RandomPost() *database.Post {
+	return &database.Post{
 		Title:       gofakeit.BookTitle(),
 		Content:     gofakeit.Quote(),
 		ContentType: "md",

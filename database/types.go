@@ -1,9 +1,9 @@
-package model
+package database
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type User struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"-"`
 	Username  string             `bson:"username" json:"username" binding:"required"`
 	Email     string             `bson:"email" json:"email" binding:"required"`
 	Password  string             `bson:"password" json:"password" binding:"required"`
